@@ -90,7 +90,7 @@ function createDashboard(options = {}) {
   async function initializeQueueManager() {
     try {
       // Try to require the main ReQueue package
-      const createQueueManager = require('requeue');
+      const createQueueManager = require('re-queuejs');
       
       qm = await createQueueManager({
         redis: {

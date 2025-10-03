@@ -1,5 +1,5 @@
 {
-  "name": "@requeue/dashboard",
+  "name": "requeue-dashboard",
   "version": "1.0.0",
   "description": "Real-time dashboard for ReQueue - Advanced queue management and monitoring",
   "main": "src/index.js",
@@ -63,7 +63,7 @@
     "eslint": "^8.55.0"
   },
   "peerDependencies": {
-    "requeue": "^1.0.0"
+    "re-queuejs": "^1.0.0"
   },
   "files": [
     "src/",
