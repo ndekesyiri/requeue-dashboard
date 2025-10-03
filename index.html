@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QueueManager Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .nav {
+            background: #f8f9fa;
+            padding: 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .nav-tabs {
+            display: flex;
+            list-style: none;
+        }
+
+        .nav-tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tab:hover {
+            background: #e9ecef;
+        }
+
+        .nav-tab.active {
+            background: white;
+            border-bottom-color: #667eea;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .stat-card h3 {
+            color: #667eea;
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+
+        .stat-card p {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .queue-list {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .queue-item {
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .queue-item:last-child {
+            border-bottom: none;
+        }
+
+        .queue-info h4 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .queue-info p {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .queue-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a6fd8;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .form-group textarea {
+            height: 100px;
+            resize: vertical;
+        }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            border: 1px solid transparent;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            border-color: #bee5eb;
+            color: #0c5460;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .close {
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #aaa;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .job-item {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+
+        .job-item h5 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .job-item p {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .job-status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-processing {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-failed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-cancelled {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+
+        .refresh-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+        }
+
+        .refresh-btn:hover {
+            background: #5a6fd8;
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 QueueManager Dashboard</h1>
+            <p>Monitor and manage your job queues in real-time</p>
+        </div>
+
+        <nav class="nav">
+            <ul class="nav-tabs">
+                <li class="nav-tab active" data-tab="overview">📊 Overview</li>
+                <li class="nav-tab" data-tab="queues">📋 Queues</li>
+                <li class="nav-tab" data-tab="jobs">⚡ Jobs</li>
+                <li class="nav-tab" data-tab="settings">⚙️ Settings</li>
+            </ul>
+        </nav>
+
+        <div class="content">
+            <!-- Overview Tab -->
+            <div id="overview" class="tab-content active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3 id="totalQueues">-</h3>
+                        <p>Total Queues</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="totalJobs">-</h3>
+                        <p>Total Jobs</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="activeJobs">-</h3>
+                        <p>Active Jobs</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="failedJobs">-</h3>
+                        <p>Failed Jobs</p>
+                    </div>
+                </div>
+
+                <div class="queue-list">
+                    <h3 style="padding: 20px; margin: 0; border-bottom: 1px solid #e9ecef;">Recent Activity</h3>
+                    <div id="recentActivity">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            Loading recent activity...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Queues Tab -->
+            <div id="queues" class="tab-content">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3>Queue Management</h3>
+                    <button class="btn btn-primary" onclick="showCreateQueueModal()">+ Create Queue</button>
+                </div>
+                <div id="queuesList">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        Loading queues...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Jobs Tab -->
+            <div id="jobs" class="tab-content">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3>Job Management</h3>
+                    <div>
+                        <select id="queueFilter" style="margin-right: 10px;">
+                            <option value="">All Queues</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="refreshJobs()">Refresh</button>
+                    </div>
+                </div>
+                <div id="jobsList">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        Loading jobs...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div id="settings" class="tab-content">
+                <h3>Dashboard Settings</h3>
+                <div class="form-group">
+                    <label for="apiEndpoint">API Endpoint</label>
+                    <input type="text" id="apiEndpoint" value="http://localhost:3000/api" placeholder="http://localhost:3000/api">
+                </div>
+                <div class="form-group">
+                    <label for="refreshInterval">Auto-refresh Interval (seconds)</label>
+                    <select id="refreshInterval">
+                        <option value="5">5 seconds</option>
+                        <option value="10" selected>10 seconds</option>
+                        <option value="30">30 seconds</option>
+                        <option value="60">60 seconds</option>
+                        <option value="0">Disabled</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Queue Modal -->
+    <div id="createQueueModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Create New Queue</h3>
+                <span class="close" onclick="closeModal('createQueueModal')">&times;</span>
+            </div>
+            <form id="createQueueForm">
+                <div class="form-group">
+                    <label for="queueName">Queue Name</label>
+                    <input type="text" id="queueName" required>
+                </div>
+                <div class="form-group">
+                    <label for="queueId">Queue ID</label>
+                    <input type="text" id="queueId" required>
+                </div>
+                <div class="form-group">
+                    <label for="queueDescription">Description</label>
+                    <textarea id="queueDescription"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="maxSize">Max Size</label>
+                    <input type="number" id="maxSize" value="10000">
+                </div>
+                <button type="submit" class="btn btn-primary">Create Queue</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Job Modal -->
+    <div id="addJobModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Job to Queue</h3>
+                <span class="close" onclick="closeModal('addJobModal')">&times;</span>
+            </div>
+            <form id="addJobForm">
+                <div class="form-group">
+                    <label for="jobQueueId">Queue ID</label>
+                    <select id="jobQueueId" required>
+                        <option value="">Select Queue</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="jobData">Job Data (JSON)</label>
+                    <textarea id="jobData" placeholder='{"task": "example", "data": "value"}' required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="jobPriority">Priority (1-10)</label>
+                    <input type="number" id="jobPriority" min="1" max="10" value="5">
+                </div>
+                <button type="submit" class="btn btn-primary">Add Job</button>
+            </form>
+        </div>
+    </div>
+
+    <button class="refresh-btn" onclick="refreshAll()" title="Refresh All">🔄</button>
+
+    <script>
+        // Global variables
+        let refreshInterval = null;
+        let apiEndpoint = 'http://localhost:3000/api';
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSettings();
+            setupEventListeners();
+            refreshAll();
+            startAutoRefresh();
+        });
+
+        // Load settings from localStorage
+        function loadSettings() {
+            const savedEndpoint = localStorage.getItem('qm_apiEndpoint');
+            const savedInterval = localStorage.getItem('qm_refreshInterval');
+            
+            if (savedEndpoint) {
+                apiEndpoint = savedEndpoint;
+                document.getElementById('apiEndpoint').value = savedEndpoint;
+            }
+            
+            if (savedInterval) {
+                document.getElementById('refreshInterval').value = savedInterval;
+            }
+        }
+
+        // Save settings to localStorage
+        function saveSettings() {
+            apiEndpoint = document.getElementById('apiEndpoint').value;
+            const interval = document.getElementById('refreshInterval').value;
+            
+            localStorage.setItem('qm_apiEndpoint', apiEndpoint);
+            localStorage.setItem('qm_refreshInterval', interval);
+            
+            startAutoRefresh();
+            showAlert('Settings saved successfully!', 'success');
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Tab switching
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabName = this.dataset.tab;
+                    switchTab(tabName);
+                });
+            });
+
+            // Form submissions
+            document.getElementById('createQueueForm').addEventListener('submit', handleCreateQueue);
+            document.getElementById('addJobForm').addEventListener('submit', handleAddJob);
+        }
+
+        // Switch tabs
+        function switchTab(tabName) {
+            // Update nav tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+
+            // Update content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(tabName).classList.add('active');
+
+            // Load tab-specific data
+            if (tabName === 'queues') {
+                loadQueues();
+            } else if (tabName === 'jobs') {
+                loadJobs();
+            }
+        }
+
+        // API calls
+        async function apiCall(endpoint, method = 'GET', data = null) {
+            try {
+                const options = {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                };
+
+                if (data) {
+                    options.body = JSON.stringify(data);
+                }
+
+                const response = await fetch(`${apiEndpoint}${endpoint}`, options);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                return await response.json();
+            } catch (error) {
+                console.error('API call failed:', error);
+                showAlert(`API Error: ${error.message}`, 'danger');
+                throw error;
+            }
+        }
+
+        // Load overview data
+        async function loadOverview() {
+            try {
+                const [queues, systemStats] = await Promise.all([
+                    apiCall('/queues'),
+                    apiCall('/system/stats')
+                ]);
+
+                document.getElementById('totalQueues').textContent = queues.total || 0;
+                document.getElementById('totalJobs').textContent = systemStats.system?.totalJobs || 0;
+                document.getElementById('activeJobs').textContent = systemStats.system?.activeJobs || 0;
+                document.getElementById('failedJobs').textContent = systemStats.system?.failedJobs || 0;
+
+                // Load recent activity
+                loadRecentActivity();
+            } catch (error) {
+                console.error('Failed to load overview:', error);
+            }
+        }
+
+        // Load recent activity
+        async function loadRecentActivity() {
+            try {
+                const activity = await apiCall('/activity/recent');
+                const container = document.getElementById('recentActivity');
+                
+                if (activity.length === 0) {
+                    container.innerHTML = '<div style="padding: 20px; text-align: center; color: #6c757d;">No recent activity</div>';
+                    return;
+                }
+
+                container.innerHTML = activity.map(item => `
+                    <div class="queue-item">
+                        <div class="queue-info">
+                            <h4>${item.type}</h4>
+                            <p>${item.description}</p>
+                            <small>${new Date(item.timestamp).toLocaleString()}</small>
+                        </div>
+                        <div class="queue-actions">
+                            <span class="job-status status-${item.status}">${item.status}</span>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                document.getElementById('recentActivity').innerHTML = 
+                    '<div style="padding: 20px; text-align: center; color: #dc3545;">Failed to load recent activity</div>';
+            }
+        }
+
+        // Load queues
+        async function loadQueues() {
+            try {
+                const queues = await apiCall('/queues');
+                const container = document.getElementById('queuesList');
+                
+                if (queues.queues.length === 0) {
+                    container.innerHTML = '<div style="padding: 20px; text-align: center; color: #6c757d;">No queues found</div>';
+                    return;
+                }
+
+                container.innerHTML = queues.queues.map(queue => `
+                    <div class="queue-item">
+                        <div class="queue-info">
+                            <h4>${queue.name}</h4>
+                            <p>ID: ${queue.id}</p>
+                            <p>Items: ${queue.itemCount || 0} | Created: ${new Date(queue.createdAt).toLocaleDateString()}</p>
+                        </div>
+                        <div class="queue-actions">
+                            <button class="btn btn-primary" onclick="viewQueueJobs('${queue.id}')">View Jobs</button>
+                            <button class="btn btn-warning" onclick="pauseQueue('${queue.id}')">Pause</button>
+                            <button class="btn btn-danger" onclick="deleteQueue('${queue.id}')">Delete</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                document.getElementById('queuesList').innerHTML = 
+                    '<div style="padding: 20px; text-align: center; color: #dc3545;">Failed to load queues</div>';
+            }
+        }
+
+        // Load jobs
+        async function loadJobs() {
+            try {
+                const queueFilter = document.getElementById('queueFilter').value;
+                const endpoint = queueFilter ? `/queues/${queueFilter}/jobs` : '/jobs';
+                const jobs = await apiCall(endpoint);
+                const container = document.getElementById('jobsList');
+                
+                if (jobs.length === 0) {
+                    container.innerHTML = '<div style="padding: 20px; text-align: center; color: #6c757d;">No jobs found</div>';
+                    return;
+                }
+
+                container.innerHTML = jobs.map(job => `
+                    <div class="job-item">
+                        <h5>Job ${job.id}</h5>
+                        <p><strong>Queue:</strong> ${job.queueId}</p>
+                        <p><strong>Status:</strong> <span class="job-status status-${job.status}">${job.status}</span></p>
+                        <p><strong>Priority:</strong> ${job.priority || 'N/A'}</p>
+                        <p><strong>Added:</strong> ${new Date(job.addedAt).toLocaleString()}</p>
+                        <p><strong>Data:</strong> ${JSON.stringify(job.data).substring(0, 100)}...</p>
+                        <div style="margin-top: 10px;">
+                            <button class="btn btn-primary" onclick="viewJobDetails('${job.id}', '${job.queueId}')">View Details</button>
+                            <button class="btn btn-danger" onclick="cancelJob('${job.id}', '${job.queueId}')">Cancel</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                document.getElementById('jobsList').innerHTML = 
+                    '<div style="padding: 20px; text-align: center; color: #dc3545;">Failed to load jobs</div>';
+            }
+        }
+
+        // Handle create queue
+        async function handleCreateQueue(event) {
+            event.preventDefault();
+            
+            const formData = {
+                name: document.getElementById('queueName').value,
+                queueId: document.getElementById('queueId').value,
+                description: document.getElementById('queueDescription').value,
+                maxSize: parseInt(document.getElementById('maxSize').value)
+            };
+
+            try {
+                await apiCall('/queues', 'POST', formData);
+                showAlert('Queue created successfully!', 'success');
+                closeModal('createQueueModal');
+                loadQueues();
+            } catch (error) {
+                showAlert(`Failed to create queue: ${error.message}`, 'danger');
+            }
+        }
+
+        // Handle add job
+        async function handleAddJob(event) {
+            event.preventDefault();
+            
+            const formData = {
+                queueId: document.getElementById('jobQueueId').value,
+                data: JSON.parse(document.getElementById('jobData').value),
+                priority: parseInt(document.getElementById('jobPriority').value)
+            };
+
+            try {
+                await apiCall(`/queues/${formData.queueId}/jobs`, 'POST', formData);
+                showAlert('Job added successfully!', 'success');
+                closeModal('addJobModal');
+                loadJobs();
+            } catch (error) {
+                showAlert(`Failed to add job: ${error.message}`, 'danger');
+            }
+        }
+
+        // Queue actions
+        async function pauseQueue(queueId) {
+            try {
+                await apiCall(`/queues/${queueId}/pause`, 'POST');
+                showAlert('Queue paused successfully!', 'success');
+                loadQueues();
+            } catch (error) {
+                showAlert(`Failed to pause queue: ${error.message}`, 'danger');
+            }
+        }
+
+        async function deleteQueue(queueId) {
+            if (!confirm('Are you sure you want to delete this queue? This action cannot be undone.')) {
+                return;
+            }
+
+            try {
+                await apiCall(`/queues/${queueId}`, 'DELETE');
+                showAlert('Queue deleted successfully!', 'success');
+                loadQueues();
+            } catch (error) {
+                showAlert(`Failed to delete queue: ${error.message}`, 'danger');
+            }
+        }
+
+        // Job actions
+        async function cancelJob(jobId, queueId) {
+            if (!confirm('Are you sure you want to cancel this job?')) {
+                return;
+            }
+
+            try {
+                await apiCall(`/queues/${queueId}/jobs/${jobId}/cancel`, 'POST');
+                showAlert('Job cancelled successfully!', 'success');
+                loadJobs();
+            } catch (error) {
+                showAlert(`Failed to cancel job: ${error.message}`, 'danger');
+            }
+        }
+
+        // Modal functions
+        function showCreateQueueModal() {
+            document.getElementById('createQueueModal').style.display = 'block';
+        }
+
+        function showAddJobModal() {
+            // Populate queue dropdown
+            populateQueueDropdown();
+            document.getElementById('addJobModal').style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        async function populateQueueDropdown() {
+            try {
+                const queues = await apiCall('/queues');
+                const select = document.getElementById('jobQueueId');
+                select.innerHTML = '<option value="">Select Queue</option>';
+                
+                queues.queues.forEach(queue => {
+                    const option = document.createElement('option');
+                    option.value = queue.id;
+                    option.textContent = queue.name;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Failed to populate queue dropdown:', error);
+            }
+        }
+
+        // Utility functions
+        function showAlert(message, type) {
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            
+            const content = document.querySelector('.content');
+            content.insertBefore(alert, content.firstChild);
+            
+            setTimeout(() => {
+                alert.remove();
+            }, 5000);
+        }
+
+        function refreshAll() {
+            loadOverview();
+            if (document.getElementById('queues').classList.contains('active')) {
+                loadQueues();
+            }
+            if (document.getElementById('jobs').classList.contains('active')) {
+                loadJobs();
+            }
+        }
+
+        function startAutoRefresh() {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+
+            const interval = parseInt(document.getElementById('refreshInterval').value);
+            if (interval > 0) {
+                refreshInterval = setInterval(refreshAll, interval * 1000);
+            }
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>

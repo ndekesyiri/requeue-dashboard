@@ -1,0 +1,290 @@
+#!/usr/bin/env node
+
+/**
+ * ReQueue Dashboard CLI
+ * Easy installation and setup for the ReQueue dashboard
+ */
+
+const { program } = require('commander');
+const chalk = require('chalk');
+const ora = require('ora');
+const inquirer = require('inquirer');
+const fs = require('fs');
+const path = require('path');
+const { execSync } = require('child_process');
+
+program
+  .name('requeue-dashboard')
+  .description('ReQueue Dashboard - Real-time queue management and monitoring')
+  .version('1.0.0');
+
+// Install command
+program
+  .command('install')
+  .description('Install and setup ReQueue Dashboard')
+  .option('-p, --port <port>', 'Dashboard port', '3000')
+  .option('-r, --redis-host <host>', 'Redis host', 'localhost')
+  .option('-P, --redis-port <port>', 'Redis port', '6379')
+  .option('-d, --redis-db <db>', 'Redis database', '0')
+  .option('--no-auth', 'Disable authentication')
+  .option('--no-websocket', 'Disable WebSocket features')
+  .action(async (options) => {
+    console.log(chalk.blue.bold('\n ReQueue Dashboard Setup\n'));
+    
+    const spinner = ora('Setting up dashboard...').start();
+    
+    try {
+      // Create dashboard directory
+      const dashboardDir = path.join(process.cwd(), 'requeue-dashboard');
+      if (!fs.existsSync(dashboardDir)) {
+        fs.mkdirSync(dashboardDir, { recursive: true });
+      }
+      
+      // Copy dashboard files
+      const sourceDir = path.join(__dirname, '..', 'src');
+      const publicDir = path.join(__dirname, '..', 'public');
+      
+      if (fs.existsSync(sourceDir)) {
+        copyDirectory(sourceDir, path.join(dashboardDir, 'src'));
+      }
+      
+      if (fs.existsSync(publicDir)) {
+        copyDirectory(publicDir, path.join(dashboardDir, 'public'));
+      }
+      
+      // Create configuration file
+      const config = {
+        port: parseInt(options.port),
+        redis: {
+          host: options.redisHost,
+          port: parseInt(options.redisPort),
+          db: parseInt(options.redisDb)
+        },
+        features: {
+          authentication: options.auth,
+          websocket: options.websocket
+        }
+      };
+      
+      fs.writeFileSync(
+        path.join(dashboardDir, 'config.json'),
+        JSON.stringify(config, null, 2)
+      );
+      
+      // Create package.json for the dashboard
+      const packageJson = {
+        name: 'requeue-dashboard',
+        version: '1.0.0',
+        description: 'ReQueue Dashboard',
+        main: 'src/server.js',
+        scripts: {
+          start: 'node src/server.js',
+          dev: 'nodemon src/server.js'
+        },
+        dependencies: {
+          express: '^4.18.2',
+          cors: '^2.8.5',
+          socket.io: '^4.7.4',
+          'express-rate-limit': '^7.1.5',
+          helmet: '^7.1.0',
+          bcryptjs: '^2.4.3',
+          jsonwebtoken: '^9.0.2',
+          'express-validator': '^7.0.1'
+        }
+      };
+      
+      fs.writeFileSync(
+        path.join(dashboardDir, 'package.json'),
+        JSON.stringify(packageJson, null, 2)
+      );
+      
+      spinner.succeed('Dashboard files created successfully!');
+      
+      // Install dependencies
+      const installSpinner = ora('Installing dependencies...').start();
+      process.chdir(dashboardDir);
+      execSync('npm install', { stdio: 'inherit' });
+      installSpinner.succeed('Dependencies installed!');
+      
+      console.log(chalk.green.bold('\n ReQueue Dashboard installed successfully!\n'));
+      console.log(chalk.yellow('Next steps:'));
+      console.log(`  ${chalk.cyan('cd requeue-dashboard')}`);
+      console.log(`  ${chalk.cyan('npm start')}`);
+      console.log(`  ${chalk.cyan('Open http://localhost:${options.port}')}\n`);
+      
+    } catch (error) {
+      spinner.fail('Installation failed!');
+      console.error(chalk.red(error.message));
+      process.exit(1);
+    }
+  });
+
+// Start command
+program
+  .command('start')
+  .description('Start the ReQueue Dashboard')
+  .option('-p, --port <port>', 'Dashboard port', '3000')
+  .option('-c, --config <file>', 'Configuration file', 'config.json')
+  .action((options) => {
+    console.log(chalk.blue.bold('\n Starting ReQueue Dashboard\n'));
+    
+    const configPath = path.resolve(options.config);
+    if (!fs.existsSync(configPath)) {
+      console.error(chalk.red(`Configuration file not found: ${configPath}`));
+      process.exit(1);
+    }
+    
+    const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    
+    // Set environment variables
+    process.env.PORT = options.port;
+    process.env.REDIS_HOST = config.redis.host;
+    process.env.REDIS_PORT = config.redis.port;
+    process.env.REDIS_DB = config.redis.db;
+    
+    // Start the server
+    require('../src/server.js');
+  });
+
+// Create command
+program
+  .command('create <name>')
+  .description('Create a new dashboard project')
+  .option('-p, --port <port>', 'Dashboard port', '3000')
+  .action(async (name, options) => {
+    console.log(chalk.blue.bold(`\n Creating ReQueue Dashboard: ${name}\n`));
+    
+    const questions = [
+      {
+        type: 'input',
+        name: 'port',
+        message: 'Dashboard port:',
+        default: options.port
+      },
+      {
+        type: 'input',
+        name: 'redisHost',
+        message: 'Redis host:',
+        default: 'localhost'
+      },
+      {
+        type: 'input',
+        name: 'redisPort',
+        message: 'Redis port:',
+        default: '6379'
+      },
+      {
+        type: 'confirm',
+        name: 'authentication',
+        message: 'Enable authentication?',
+        default: true
+      },
+      {
+        type: 'confirm',
+        name: 'websocket',
+        message: 'Enable WebSocket features?',
+        default: true
+      }
+    ];
+    
+    const answers = await inquirer.prompt(questions);
+    
+    const spinner = ora('Creating dashboard project...').start();
+    
+    try {
+      const projectDir = path.join(process.cwd(), name);
+      if (fs.existsSync(projectDir)) {
+        throw new Error(`Directory ${name} already exists`);
+      }
+      
+      fs.mkdirSync(projectDir, { recursive: true });
+      
+      // Copy dashboard files
+      const sourceDir = path.join(__dirname, '..', 'src');
+      if (fs.existsSync(sourceDir)) {
+        copyDirectory(sourceDir, path.join(projectDir, 'src'));
+      }
+      
+      // Create configuration
+      const config = {
+        port: parseInt(answers.port),
+        redis: {
+          host: answers.redisHost,
+          port: parseInt(answers.redisPort),
+          db: 0
+        },
+        features: {
+          authentication: answers.authentication,
+          websocket: answers.websocket
+        }
+      };
+      
+      fs.writeFileSync(
+        path.join(projectDir, 'config.json'),
+        JSON.stringify(config, null, 2)
+      );
+      
+      // Create package.json
+      const packageJson = {
+        name: name,
+        version: '1.0.0',
+        description: 'ReQueue Dashboard',
+        main: 'src/server.js',
+        scripts: {
+          start: 'node src/server.js',
+          dev: 'nodemon src/server.js'
+        },
+        dependencies: {
+          express: '^4.18.2',
+          cors: '^2.8.5',
+          socket.io: '^4.7.4',
+          'express-rate-limit': '^7.1.5',
+          helmet: '^7.1.0',
+          bcryptjs: '^2.4.3',
+          jsonwebtoken: '^9.0.2',
+          'express-validator': '^7.0.1'
+        }
+      };
+      
+      fs.writeFileSync(
+        path.join(projectDir, 'package.json'),
+        JSON.stringify(packageJson, null, 2)
+      );
+      
+      spinner.succeed('Dashboard project created successfully!');
+      
+      console.log(chalk.green.bold('\n Dashboard project created!\n'));
+      console.log(chalk.yellow('Next steps:'));
+      console.log(`  ${chalk.cyan(`cd ${name}`)}`);
+      console.log(`  ${chalk.cyan('npm install')}`);
+      console.log(`  ${chalk.cyan('npm start')}`);
+      console.log(`  ${chalk.cyan(`Open http://localhost:${answers.port}`)}\n`);
+      
+    } catch (error) {
+      spinner.fail('Project creation failed!');
+      console.error(chalk.red(error.message));
+      process.exit(1);
+    }
+  });
+
+// Helper function to copy directory
+function copyDirectory(src, dest) {
+  if (!fs.existsSync(dest)) {
+    fs.mkdirSync(dest, { recursive: true });
+  }
+  
+  const entries = fs.readdirSync(src, { withFileTypes: true });
+  
+  for (const entry of entries) {
+    const srcPath = path.join(src, entry.name);
+    const destPath = path.join(dest, entry.name);
+    
+    if (entry.isDirectory()) {
+      copyDirectory(srcPath, destPath);
+    } else {
+      fs.copyFileSync(srcPath, destPath);
+    }
+  }
+}
+
+program.parse();
