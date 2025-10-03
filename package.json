@@ -1,6 +1,6 @@
 {
   "name": "requeue-dashboard",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Real-time dashboard for ReQueue - Advanced queue management and monitoring",
   "main": "src/index.js",
   "bin": {
