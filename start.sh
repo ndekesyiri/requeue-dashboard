@@ -1,8 +1,6 @@
 #!/bin/bash
 
-# QueueManager Dashboard Startup Script
-
-echo "Starting QueueManager Dashboard..."
+echo "Starting ReQueue Dashboard..."
 
 # Check if Node.js is installed
 if ! command -v node &> /dev/null; then

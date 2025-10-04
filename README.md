@@ -6,9 +6,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js Version](https://img.shields.io/node/v/@requeue/dashboard)](https://nodejs.org/)
 
-A powerful, real-time dashboard for monitoring and managing your ReQueue instances. Built with modern web technologies and designed for production use.
+A powerful, real-time dashboard for monitoring and managing your ReQueue instances.
 
-## ✨ Features
+## Features  (What it i can do)
 
 ###  Real-time Monitoring
 - **Live Statistics**: Queue counts, job status, system health
@@ -327,12 +327,10 @@ const limiter = rateLimit({
 4. Push to branch: `git push origin feature/amazing-feature`
 5. Open a Pull Request
 
-##  License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ##  Support
 
+- **Website**: [https://ndekesyiri.github.io/requeue/](https://ndekesyiri.github.io/requeue/)
 - **Documentation**: [https://github.com/ndekesyiri/requeue-dashboard](https://github.com/ndekesyiri/requeue-dashboard)
 - **Issues**: [https://github.com/ndekesyiri/requeue-dashboard/issues](https://github.com/ndekesyiri/requeue-dashboard/issues)
 - **Discussions**: [https://github.com/ndekesyiri/requeue-dashboard/discussions](https://github.com/ndekesyiri/requeue-dashboard/discussions)
@@ -340,9 +338,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ##  Acknowledgments
 
 - Built for the [ReQueue](https://github.com/ndekesyiri/requeue) project
-- Powered by Express.js, Socket.IO, and modern web technologies
-- Inspired by the need for better queue management tools
 
 ---
 
-**Made with ❤️ by the ReQueue Team**
+**Made with ❤️ by ndekesyiri**

@@ -1,8 +1,3 @@
-/**
- * ReQueue Dashboard - Main Entry Point
- * Real-time queue management and monitoring dashboard
- */
-
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -41,10 +36,6 @@ function createDashboard(options = {}) {
     features = {
       authentication: false,
       websocket: true
-    },
-    security = {
-      jwtSecret: 'your-secret-key',
-      bcryptRounds: 12
     }
   } = options;
 
@@ -63,8 +54,10 @@ function createDashboard(options = {}) {
       directives: {
         defaultSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
-        scriptSrc: ["'self'", "'unsafe-inline'"],
-        connectSrc: ["'self'", "ws:", "wss:"]
+        scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
+        connectSrc: ["'self'", "ws:", "wss:"],
+        imgSrc: ["'self'", "data:", "https:"],
+        fontSrc: ["'self'", "https:", "data:"]
       }
     }
   }));
@@ -289,8 +282,10 @@ function createDashboard(options = {}) {
     body('queueId').notEmpty().withMessage('Queue ID is required')
   ], async (req, res) => {
     try {
+      console.log('POST /api/queues - Request body:', req.body);
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
+        console.log('Validation errors:', errors.array());
         return res.status(400).json({ errors: errors.array() });
       }
 

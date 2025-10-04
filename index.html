@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QueueManager Dashboard</title>
+    <title>ReQueue Dashboard</title>
     <style>
         * {
             margin: 0;
@@ -365,10 +365,10 @@
             background: #667eea;
             color: white;
             border: none;
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            font-size: 24px;
+            border-radius: 25px;
+            width: 100px;
+            height: 50px;
+            font-size: 20px;
             cursor: pointer;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             transition: all 0.3s ease;
@@ -383,16 +383,16 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🚀 QueueManager Dashboard</h1>
+            <h1>ReQueue</h1>
             <p>Monitor and manage your job queues in real-time</p>
         </div>
 
         <nav class="nav">
             <ul class="nav-tabs">
-                <li class="nav-tab active" data-tab="overview">📊 Overview</li>
-                <li class="nav-tab" data-tab="queues">📋 Queues</li>
-                <li class="nav-tab" data-tab="jobs">⚡ Jobs</li>
-                <li class="nav-tab" data-tab="settings">⚙️ Settings</li>
+                <li class="nav-tab active" data-tab="overview">Overview</li>
+                <li class="nav-tab" data-tab="queues">Queues</li>
+                <li class="nav-tab" data-tab="jobs">Jobs</li>
+                <li class="nav-tab" data-tab="settings">Settings</li>
             </ul>
         </nav>
 
@@ -540,7 +540,7 @@
         </div>
     </div>
 
-    <button class="refresh-btn" onclick="refreshAll()" title="Refresh All">🔄</button>
+    <button class="refresh-btn" onclick="refreshAll()" title="Refresh All">Refresh</button>
 
     <script>
         // Global variables

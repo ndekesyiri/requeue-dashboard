@@ -1,10 +1,5 @@
 #!/usr/bin/env node
 
-/**
- * ReQueue Dashboard CLI
- * Easy installation and setup for the ReQueue dashboard
- */
-
 const { program } = require('commander');
 const chalk = require('chalk');
 const ora = require('ora');
@@ -16,7 +11,7 @@ const { execSync } = require('child_process');
 program
   .name('requeue-dashboard')
   .description('ReQueue Dashboard - Real-time queue management and monitoring')
-  .version('1.0.0');
+  .version('1.0.3');
 
 // Install command
 program
@@ -74,7 +69,7 @@ program
       // Create package.json for the dashboard
       const packageJson = {
         name: 'requeue-dashboard',
-        version: '1.0.0',
+        version: '1.0.3',
         description: 'ReQueue Dashboard',
         main: 'src/server.js',
         scripts: {
@@ -227,7 +222,7 @@ program
       // Create package.json
       const packageJson = {
         name: name,
-        version: '1.0.0',
+        version: '1.0.3',
         description: 'ReQueue Dashboard',
         main: 'src/server.js',
         scripts: {
